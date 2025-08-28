@@ -3,8 +3,8 @@ const searchInput       = document.getElementById("search-input");
 const typeFilter        = document.getElementById("type-filter");
 const sortOrderSelect   = document.getElementById("sort-order");
 const eggGroupFilter    = document.getElementById("egg-group-filter");
-const statFilter        = document.getElementById("stat-filter");   // NEW
-const statTier          = document.getElementById("stat-tier");     // NEW
+const statFilter        = document.getElementById("stat-filter");
+const statTier          = document.getElementById("stat-tier"); 
 const resetBtn          = document.getElementById("reset-filters");
 
 let allPokemon = [];
@@ -16,7 +16,7 @@ async function fetchPokemon() {
         const response = await fetch(url);
         const pokemonData = await response.json();
 
-        // Fetch species data for egg groups
+        
         const speciesUrl = "https://pokeapi.co/api/v2/pokemon-species/" + i;
         const speciesResponse = await fetch(speciesUrl);
         const speciesData = await speciesResponse.json();
@@ -58,7 +58,7 @@ function renderPokemonList(list) {
             '<h3>' + name + '</h3>' +
             '<div>' + badgesHtml + '</div>';
 
-        // Highlight if matching stat filter
+        
         if (selectedStat && selectedTier) {
             const statObj = pok.stats.find(s => s.stat.name === selectedStat);
             if (statObj) {
@@ -187,7 +187,7 @@ function applyFilters() {
     renderPokemonList(filtered);
 }
 
-// Event listeners
+
 searchInput.addEventListener("input", applyFilters);
 typeFilter.addEventListener("change", applyFilters);
 sortOrderSelect.addEventListener("change", applyFilters);
