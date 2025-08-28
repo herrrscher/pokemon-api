@@ -2,6 +2,7 @@ const pokemonGrid      = document.getElementById("pokemon-grid");
 const searchInput      = document.getElementById("search-input");
 const typeFilter       = document.getElementById("type-filter");
 const sortOrderSelect  = document.getElementById("sort-order");
+const eggGroupFilter   = document.getElementById("egg-group-filter"); // NEW
 const resetBtn         = document.getElementById("reset-filters");
 
 let allPokemon = [];
@@ -10,11 +11,23 @@ async function fetchPokemon() {
     allPokemon = [];
     for (let i = 1; i <= 151; i++) {
         const url = "https://pokeapi.co/api/v2/pokemon/" + i;
-        const response    = await fetch(url);
+        const response = await fetch(url);
         const pokemonData = await response.json();
+
+        // NEW: Fetch species data for egg groups
+        const speciesUrl = "https://pokeapi.co/api/v2/pokemon-species/" + i;
+        const speciesResponse = await fetch(speciesUrl);
+        const speciesData = await speciesResponse.json();
+
+        // Add egg groups to the Pokémon object
+        const eggGroups = speciesData.egg_groups.map(group => group.name);
+        pokemonData.eggGroups = eggGroups;
+
         allPokemon.push(pokemonData);
     }
+
     populateTypeFilter();
+    populateEggGroupFilter(); // NEW
     renderPokemonList(allPokemon);
 }
 
@@ -38,11 +51,18 @@ function renderPokemonList(list) {
             badgesHtml += '<span class="type-badge">' + types[j] + '</span>';
         }
 
+        // NEW: Add egg groups display
+        let eggGroupHtml = "";
+        if (pok.eggGroups && pok.eggGroups.length > 0) {
+            eggGroupHtml = "<div class='egg-groups'>Egg Groups: " + pok.eggGroups.join(", ") + "</div>";
+        }
+
         card.innerHTML =
             '<span class="poke-number">#' + pok.id.toString().padStart(3, "0") + '</span>' +
             '<img src="' + pok.sprites.other['official-artwork'].front_default + '" alt="' + name + '">' +
             '<h3>' + name + '</h3>' +
-            '<div>' + badgesHtml + '</div>';
+            '<div>' + badgesHtml + '</div>' +
+            eggGroupHtml;
 
         const badges = card.querySelectorAll(".type-badge");
         for (let j = 0; j < badges.length; j++) {
@@ -50,8 +70,9 @@ function renderPokemonList(list) {
             badge.style.cursor = "pointer";
             badge.addEventListener("click", function() {
                 const selectedType = badge.textContent.toLowerCase();
-                searchInput.value = "";
-                typeFilter.value    = "";
+                searchInput.value  = "";
+                typeFilter.value   = "";
+                eggGroupFilter.value = ""; // reset egg group filter
                 const filtered = [];
                 for (let k = 0; k < allPokemon.length; k++) {
                     const pokemon = allPokemon[k];
@@ -71,6 +92,9 @@ function renderPokemonList(list) {
 }
 
 searchInput.addEventListener("input", applyFilters);
+typeFilter.addEventListener("change", applyFilters);
+sortOrderSelect.addEventListener("change", applyFilters);
+eggGroupFilter.addEventListener("change", applyFilters); // NEW
 
 function populateTypeFilter() {
     const typesSet = new Set();
@@ -87,13 +111,28 @@ function populateTypeFilter() {
     });
 }
 
-typeFilter.addEventListener("change", applyFilters);
-sortOrderSelect.addEventListener("change", applyFilters);
+
+function populateEggGroupFilter() {
+    const eggGroupSet = new Set();
+    for (let i = 0; i < allPokemon.length; i++) {
+        const groups = allPokemon[i].eggGroups || [];
+        for (let j = 0; j < groups.length; j++) {
+            eggGroupSet.add(groups[j]);
+        }
+    }
+    eggGroupSet.forEach(function(group) {
+        const option = document.createElement("option");
+        option.value       = group;
+        option.textContent = group.charAt(0).toUpperCase() + group.slice(1);
+        eggGroupFilter.appendChild(option);
+    });
+}
 
 resetBtn.addEventListener("click", function() {
-    searchInput.value      = "";
-    typeFilter.value       = "";
-    sortOrderSelect.value  = "asc";
+    searchInput.value       = "";
+    typeFilter.value        = "";
+    sortOrderSelect.value   = "asc";
+    eggGroupFilter.value    = ""; 
     renderPokemonList(allPokemon);
 });
 
@@ -121,6 +160,14 @@ function applyFilters() {
             }
         }
         filtered = temp;
+    }
+
+    
+    const selectedEggGroup = eggGroupFilter.value;
+    if (selectedEggGroup) {
+        filtered = filtered.filter(pokemon =>
+            pokemon.eggGroups && pokemon.eggGroups.includes(selectedEggGroup)
+        );
     }
 
     const sortOrder = sortOrderSelect.value;
