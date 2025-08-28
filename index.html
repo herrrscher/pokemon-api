@@ -9,39 +9,44 @@
 <body>
   <div class="pokedex-container">
     <header class="pokedex-header">
-    <img src="logo.png" alt="Pokédex (Gen 1)" class="logo">
-      <input type="text" id="search-input" placeholder="Zoek op naam of nummer">
-      <select id="type-filter">
-        <option value="">Alle types</option>
-      </select>
-      <select id="sort-order">
-        <option value="asc">ID oplopend</option>
-        <option value="desc">ID aflopend</option>
-      </select>
-      <select id="egg-group-filter">
-        <option value="">egg group</option>
-      </select>
-      <button id="reset-filters">Reset filters</button>
-      <select id="stat-filter">
-  <option value="">Filter op stat</option>
-  <option value="hp">HP</option>
-  <option value="attack">Attack</option>
-  <option value="defense">Defense</option>
-  <option value="special-attack">Special Attack</option>
-  <option value="special-defense">Special Defense</option>
-  <option value="speed">Speed</option>
-</select>
+  <img src="logo.png" alt="Pokédex (Gen 1)" class="logo">
 
-<select id="stat-tier">
-  <option value="">Alle sterktes</option>
-  <option value="high">Hoog</option>
-  <option value="medium">Gemiddeld</option>
-  <option value="low">Laag</option>
-</select>
+  <input type="text" id="search-input" placeholder="Zoek op naam of nummer">
+  <input type="text" id="move-search" placeholder="Zoek op move (bijv. thunderbolt)"> <!-- NEW -->
 
+  <select id="type-filter">
+    <option value="">Alle types</option>
+  </select>
 
+  <select id="sort-order">
+    <option value="asc">ID oplopend</option>
+    <option value="desc">ID aflopend</option>
+  </select>
 
-    </header>
+  <select id="egg-group-filter">
+    <option value="">Egg group</option>
+  </select>
+
+  <select id="stat-filter">
+    <option value="">Filter op stat</option>
+    <option value="hp">HP</option>
+    <option value="attack">Attack</option>
+    <option value="defense">Defense</option>
+    <option value="special-attack">Special Attack</option>
+    <option value="special-defense">Special Defense</option>
+    <option value="speed">Speed</option>
+  </select>
+
+  <select id="stat-tier">
+    <option value="">Alle sterktes</option>
+    <option value="high">Hoog</option>
+    <option value="medium">Gemiddeld</option>
+    <option value="low">Laag</option>
+  </select>
+
+  <button id="reset-filters">Reset filters</button>
+</header>
+
 
     <main class="pokemon-grid" id="pokemon-grid">
     </main>

@@ -1,10 +1,11 @@
 const pokemonGrid       = document.getElementById("pokemon-grid");
 const searchInput       = document.getElementById("search-input");
+const moveSearchInput   = document.getElementById("move-search"); // NEW
 const typeFilter        = document.getElementById("type-filter");
 const sortOrderSelect   = document.getElementById("sort-order");
 const eggGroupFilter    = document.getElementById("egg-group-filter");
 const statFilter        = document.getElementById("stat-filter");
-const statTier          = document.getElementById("stat-tier"); 
+const statTier          = document.getElementById("stat-tier");
 const resetBtn          = document.getElementById("reset-filters");
 
 let allPokemon = [];
@@ -12,12 +13,12 @@ let allPokemon = [];
 async function fetchPokemon() {
     allPokemon = [];
     for (let i = 1; i <= 151; i++) {
-        const url = "https://pokeapi.co/api/v2/pokemon/" + i;
+        const url = `https://pokeapi.co/api/v2/pokemon/${i}`;
         const response = await fetch(url);
         const pokemonData = await response.json();
 
-        
-        const speciesUrl = "https://pokeapi.co/api/v2/pokemon-species/" + i;
+        // Fetch species data for egg groups
+        const speciesUrl = `https://pokeapi.co/api/v2/pokemon-species/${i}`;
         const speciesResponse = await fetch(speciesUrl);
         const speciesData = await speciesResponse.json();
 
@@ -38,27 +39,23 @@ function renderPokemonList(list) {
     const selectedStat = statFilter.value;
     const selectedTier = statTier.value;
 
-    for (let i = 0; i < list.length; i++) {
-        const pok = list[i];
+    for (const pok of list) {
         const card = document.createElement("div");
         card.classList.add("pokemon-card");
 
         const name = pok.name.charAt(0).toUpperCase() + pok.name.slice(1);
 
         const types = pok.types.map(t => t.type.name);
+        const badgesHtml = types.map(type => `<span class="type-badge">${type}</span>`).join("");
 
-        let badgesHtml = "";
-        for (let j = 0; j < types.length; j++) {
-            badgesHtml += '<span class="type-badge">' + types[j] + '</span>';
-        }
+        card.innerHTML = `
+            <span class="poke-number">#${pok.id.toString().padStart(3, "0")}</span>
+            <img src="${pok.sprites.other['official-artwork'].front_default}" alt="${name}">
+            <h3>${name}</h3>
+            <div>${badgesHtml}</div>
+        `;
 
-        card.innerHTML =
-            '<span class="poke-number">#' + pok.id.toString().padStart(3, "0") + '</span>' +
-            '<img src="' + pok.sprites.other['official-artwork'].front_default + '" alt="' + name + '">' +
-            '<h3>' + name + '</h3>' +
-            '<div>' + badgesHtml + '</div>';
-
-        
+        // Highlight based on stat filter
         if (selectedStat && selectedTier) {
             const statObj = pok.stats.find(s => s.stat.name === selectedStat);
             if (statObj) {
@@ -73,27 +70,21 @@ function renderPokemonList(list) {
             }
         }
 
+        // Add clickable type badge filters
         const badges = card.querySelectorAll(".type-badge");
-        for (let j = 0; j < badges.length; j++) {
-            const badge = badges[j];
+        for (const badge of badges) {
             badge.style.cursor = "pointer";
-            badge.addEventListener("click", function () {
+            badge.addEventListener("click", () => {
                 const selectedType = badge.textContent.toLowerCase();
                 searchInput.value      = "";
+                moveSearchInput.value  = "";
                 typeFilter.value       = "";
                 eggGroupFilter.value   = "";
                 statFilter.value       = "";
                 statTier.value         = "";
-                const filtered = [];
-                for (let k = 0; k < allPokemon.length; k++) {
-                    const pokemon = allPokemon[k];
-                    for (let m = 0; m < pokemon.types.length; m++) {
-                        if (pokemon.types[m].type.name === selectedType) {
-                            filtered.push(pokemon);
-                            break;
-                        }
-                    }
-                }
+                const filtered = allPokemon.filter(p =>
+                    p.types.some(t => t.type.name === selectedType)
+                );
                 renderPokemonList(filtered);
             });
         }
@@ -104,12 +95,12 @@ function renderPokemonList(list) {
 
 function populateTypeFilter() {
     const typesSet = new Set();
-    for (let i = 0; i < allPokemon.length; i++) {
-        for (let j = 0; j < allPokemon[i].types.length; j++) {
-            typesSet.add(allPokemon[i].types[j].type.name);
+    for (const p of allPokemon) {
+        for (const t of p.types) {
+            typesSet.add(t.type.name);
         }
     }
-    typesSet.forEach(function (type) {
+    typesSet.forEach(type => {
         const option = document.createElement("option");
         option.value = type;
         option.textContent = type.charAt(0).toUpperCase() + type.slice(1);
@@ -119,13 +110,12 @@ function populateTypeFilter() {
 
 function populateEggGroupFilter() {
     const eggGroupSet = new Set();
-    for (let i = 0; i < allPokemon.length; i++) {
-        const groups = allPokemon[i].eggGroups || [];
-        for (let j = 0; j < groups.length; j++) {
-            eggGroupSet.add(groups[j]);
+    for (const p of allPokemon) {
+        for (const group of p.eggGroups || []) {
+            eggGroupSet.add(group);
         }
     }
-    eggGroupSet.forEach(function (group) {
+    eggGroupSet.forEach(group => {
         const option = document.createElement("option");
         option.value = group;
         option.textContent = group.charAt(0).toUpperCase() + group.slice(1);
@@ -136,12 +126,19 @@ function populateEggGroupFilter() {
 function applyFilters() {
     let filtered = allPokemon.slice();
 
-    const term = searchInput.value.toLowerCase();
+    const term = searchInput.value.toLowerCase().trim();
     if (term) {
-        filtered = filtered.filter(function (pokemon) {
-            return pokemon.name.toLowerCase().includes(term) ||
-                pokemon.id.toString().includes(term);
-        });
+        filtered = filtered.filter(pokemon =>
+            pokemon.name.toLowerCase().includes(term) ||
+            pokemon.id.toString().includes(term)
+        );
+    }
+
+    const moveSearch = moveSearchInput.value.toLowerCase().trim();
+    if (moveSearch) {
+        filtered = filtered.filter(pokemon =>
+            pokemon.moves.some(m => m.move.name.includes(moveSearch))
+        );
     }
 
     const selType = typeFilter.value;
@@ -164,39 +161,33 @@ function applyFilters() {
         filtered = filtered.filter(pokemon => {
             const statObj = pokemon.stats.find(s => s.stat.name === selectedStat);
             if (!statObj) return false;
-
             const baseStat = statObj.base_stat;
-
-            if (selectedTier === "high") {
-                return baseStat >= 120;
-            } else if (selectedTier === "medium") {
-                return baseStat >= 81 && baseStat < 120;
-            } else if (selectedTier === "low") {
-                return baseStat < 81;
-            }
-
+            if (selectedTier === "high") return baseStat >= 120;
+            if (selectedTier === "medium") return baseStat >= 81 && baseStat < 120;
+            if (selectedTier === "low") return baseStat < 81;
             return true;
         });
     }
 
     const sortOrder = sortOrderSelect.value;
-    filtered.sort(function (a, b) {
-        return sortOrder === "asc" ? a.id - b.id : b.id - a.id;
-    });
+    filtered.sort((a, b) =>
+        sortOrder === "asc" ? a.id - b.id : b.id - a.id
+    );
 
     renderPokemonList(filtered);
 }
 
-
 searchInput.addEventListener("input", applyFilters);
+moveSearchInput.addEventListener("input", applyFilters);
 typeFilter.addEventListener("change", applyFilters);
 sortOrderSelect.addEventListener("change", applyFilters);
 eggGroupFilter.addEventListener("change", applyFilters);
 statFilter.addEventListener("change", applyFilters);
 statTier.addEventListener("change", applyFilters);
 
-resetBtn.addEventListener("click", function () {
+resetBtn.addEventListener("click", () => {
     searchInput.value       = "";
+    moveSearchInput.value   = "";
     typeFilter.value        = "";
     eggGroupFilter.value    = "";
     sortOrderSelect.value   = "asc";
