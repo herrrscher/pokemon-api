@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pokeSharp</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="shortcut icon" href="#">
+</head>
+
+<body>
+    <h1>pokesharp</h1>
+
+    <p>there is only 1025 pokemon in the firebase db</p>
+    <p>also i need to fix the db so seeing 200 null is not ideal but it works ¯\_(ツ)_/¯</p>
+
+    <div>
+        <h2>Quick Examples</h2>
+        <button onclick="runQuickExamples()">Run All Quick Examples</button>
+        <button onclick="clearAllResults()">Clear All Results</button>
+    </div>
+
+    <div>
+        <h3>Get First 3 Pokemon</h3>
+        <p>Endpoint: GET /api/pokemon?limit=3&offset=0</p>
+        <button onclick="getFirstThreePokemon()">Test</button>
+        <div id="getFirstThreeResult"></div>
+    </div>
+
+    <div>
+        <h3>Get Pokemon by ID (ID: 25)</h3>
+        <p>Endpoint: GET /api/pokemon/25</p>
+        <button onclick="getPikachuById()">Test</button>
+        <div id="getPikachuByIdResult"></div>
+    </div>
+
+    <div>
+        <h3>Get Pokemon by Name (charizard)</h3>
+        <p>Endpoint: GET /api/pokemon/name/charizard</p>
+        <button onclick="getCharizardByName()">Test</button>
+        <div id="getCharizardByNameResult"></div>
+    </div>
+
+    <div>
+        <h3>Get Electric Type Pokemon</h3>
+        <p>Endpoint: GET /api/pokemon/type/electric</p>
+        <button onclick="getElectricTypePokemon()">Test</button>
+        <div id="getElectricTypeResult"></div>
+    </div>
+
+    <div>
+        <h3>Get Pokemon with Static Ability</h3>
+        <p>Endpoint: GET /api/pokemon/ability/static</p>
+        <button onclick="getPokemonWithStaticAbility()">Test</button>
+        <div id="getStaticAbilityResult"></div>
+    </div>
+
+    <div>
+        <h3>Get Pokemon that can learn Thunderbolt</h3>
+        <p>Endpoint: GET /api/pokemon/move/thunderbolt</p>
+        <button onclick="getPokemonWithThunderbolt()">Test</button>
+        <div id="getThunderboltMoveResult"></div>
+    </div>
+
+    <div>
+        <h3>Get Pokemon with HP between 80-120</h3>
+        <p>Endpoint: GET /api/pokemon/stats?stat=hp&minValue=80&maxValue=120</p>
+        <button onclick="getPokemonWithHpRange()">Test</button>
+        <div id="getHpRangeResult"></div>
+    </div>
+
+    <div>
+        <h3>API Health Check</h3>
+        <p>Endpoint: GET /health</p>
+        <button onclick="checkApiHealth()">Test</button>
+        <div id="checkHealthResult"></div>
+    </div>
+
+    <div>
+        <h3>Fetch Pokemon from PokeAPI (ID: 1010)</h3>
+        <p>Endpoint: GET /api/pokemon/fetch/1010</p>
+        <button onclick="fetchPokemonFromPokeApi()">Test</button>
+        <div id="fetchPokeApiResult"></div>
+    </div>
+
+    <div>
+        <h3>Fetch Pokemon from PokeAPI (Name: iron-hands)</h3>
+        <p>Endpoint: GET /api/pokemon/fetch/name/iron-hands</p>
+        <button onclick="fetchIronHandsByName()">Test</button>
+        <div id="fetchIronHandsResult"></div>
+    </div>
+
+    <h2>Manual Testing</h2>
+
+    <div>
+        <h3>Get All Pokemon</h3>
+        <p>Endpoint: GET /api/pokemon?limit={limit}&offset={offset}</p>
+        <p>Offset specifies how many ids to skip before starting to return results</p>
+        <label>Limit:</label>
+        <input type="number" id="getAllLimit" value="5" min="1" max="100">
+        <label>Offset:</label>
+        <input type="number" id="getAllOffset" value="0" min="0">
+        <button onclick="getAllPokemon()">Get All Pokemon</button>
+        <div id="getAllResult"></div>
+    </div>
+
+    <div>
+        <h3>Get Pokemon by ID</h3>
+        <p>Endpoint: GET /api/pokemon/{id}</p>
+        <label>Pokemon ID:</label>
+        <input type="number" id="pokemonId" value="1" min="1">
+        <button onclick="getPokemonById()">Get Pokemon by ID</button>
+        <div id="getByIdResult"></div>
+    </div>
+
+    <div>
+        <h3>Get Pokemon by Name</h3>
+        <p>Endpoint: GET /api/pokemon/name/{name}</p>
+        <label>Pokemon Name:</label>
+        <input type="text" id="pokemonName" value="pikachu">
+        <button onclick="getPokemonByName()">Get Pokemon by Name</button>
+        <div id="getByNameResult"></div>
+    </div>
+
+    <div>
+        <h3>Get Pokemon by Type</h3>
+        <p>Endpoint: GET /api/pokemon/type/{type}</p>
+        <label>Type:</label>
+        <input type="text" id="pokemonType" value="electric">
+        <button onclick="getPokemonByType()">Get Pokemon by Type</button>
+        <div id="getByTypeResult"></div>
+    </div>
+
+    <div>
+        <h3>Get Pokemon by Ability</h3>
+        <p>Endpoint: GET /api/pokemon/ability/{ability}</p>
+        <label>Ability:</label>
+        <input type="text" id="pokemonAbility" value="static">
+        <button onclick="getPokemonByAbility()">Get Pokemon by Ability</button>
+        <div id="getByAbilityResult"></div>
+    </div>
+
+    <div>
+        <h3>Get Pokemon by Move</h3>
+        <p>Endpoint: GET /api/pokemon/move/{move}</p>
+        <label>Move:</label>
+        <input type="text" id="pokemonMove" value="thunderbolt">
+        <button onclick="getPokemonByMove()">Get Pokemon by Move</button>
+        <div id="getByMoveResult"></div>
+    </div>
+
+    <div>
+        <h3>Get Pokemon by Stats</h3>
+        <p>Endpoint: GET /api/pokemon/stats?stat={stat}&minValue={min}&maxValue={max}</p>
+        <label>Stat:</label>
+        <input type="text" id="statName" value="hp">
+        <label>Min Value:</label>
+        <input type="number" id="minStatValue" value="50" min="0">
+        <label>Max Value:</label>
+        <input type="number" id="maxStatValue" value="150" min="0">
+        <button onclick="getPokemonByStats()">Get Pokemon by Stats</button>
+        <div id="getByStatsResult"></div>
+    </div>
+
+    <div>
+        <h3>Fetch & Save Pokemon from PokeAPI by ID</h3>
+        <p>Endpoint: GET /api/pokemon/fetch/{id}</p>
+        <label>Pokemon ID:</label>
+        <input type="number" id="fetchPokemonId" value="1010" min="1">
+        <button onclick="fetchPokemonById()">Fetch & Save from PokeAPI</button>
+        <div id="fetchByIdResult"></div>
+    </div>
+
+    <div>
+        <h3>Fetch & Save Pokemon from PokeAPI by Name</h3>
+        <p>Endpoint: GET /api/pokemon/fetch/name/{name}</p>
+        <label>Pokemon Name:</label>
+        <input type="text" id="fetchPokemonName" value="iron-hands">
+        <button onclick="fetchPokemonByName()">Fetch & Save from PokeAPI</button>
+        <div id="fetchByNameResult"></div>
+    </div>
+
+
+
+    <div>
+        <h3>Create New Pokemon (POST)</h3>
+        <p>Endpoint: POST /api/pokemon</p>
+        <p>Example JSON structure:</p>
+        <textarea id="newPokemonJson" rows="10" cols="60">{
+    "id": 1025,
+    "name": "testmon",
+    "height": 10,
+    "weight": 100,
+    "baseExperience": 50,
+    "order": 1025,
+    "isDefault": true,
+    "types": ["normal"],
+    "abilities": [{"abilityName": "test-ability", "isHidden": false, "slot": 1}],
+    "moves": [{"moveName": "tackle", "learnMethod": "level-up", "levelLearnedAt": 1}],
+    "sprites": {"frontDefault": "https://example.com/sprite.png", "frontShiny": null, "backDefault": null, "backShiny": null},
+    "stats": {"hp": 50, "attack": 50, "defense": 50, "special-attack": 50, "special-defense": 50, "speed": 50},
+    "gameIndices": [],
+    "heldItems": [],
+    "speciesId": 1025,
+    "speciesName": "testmon"
+}</textarea>
+        <br>
+        <button onclick="createPokemon()">Create Pokemon</button>
+        <div id="createResult"></div>
+    </div>
+
+    <div>
+        <h3>Update Pokemon (PUT)</h3>
+        <p>Endpoint: PUT /api/pokemon/{id}</p>
+        <label>Pokemon ID to Update:</label>
+        <input type="number" id="updatePokemonId" value="1025" min="1">
+        <br>
+        <textarea id="updatePokemonJson" rows="8" cols="60">{
+    "id": 1025,
+    "name": "updated-testmon",
+    "height": 15,
+    "weight": 150,
+    "baseExperience": 75,
+    "order": 1025,
+    "isDefault": true,
+    "types": ["normal", "flying"],
+    "abilities": [{"abilityName": "updated-ability", "isHidden": false, "slot": 1}],
+    "moves": [{"moveName": "fly", "learnMethod": "level-up", "levelLearnedAt": 10}],
+    "sprites": {"frontDefault": "https://example.com/updated-sprite.png", "frontShiny": null, "backDefault": null, "backShiny": null},
+    "stats": {"hp": 75, "attack": 75, "defense": 75, "special-attack": 75, "special-defense": 75, "speed": 75},
+    "gameIndices": [],
+    "heldItems": [],
+    "speciesId": 1025,
+    "speciesName": "updated-testmon"
+}</textarea>
+        <br>
+        <button onclick="updatePokemon()">Update Pokemon</button>
+        <div id="updateResult"></div>
+    </div>
+
+    <div>
+        <h3>Delete Pokemon (DELETE)</h3>
+        <p>Endpoint: DELETE /api/pokemon/{id}</p>
+        <label>Pokemon ID to Delete:</label>
+        <input type="number" id="deletePokemonId" value="1025" min="1">
+        <button onclick="deletePokemon()">Delete Pokemon</button>
+        <div id="deleteResult"></div>
+    </div>
+
+    <div>
+        <h3>Custom Test</h3>
+        <label>Enter endpoint path (after base URL):</label>
+        <input type="text" id="customEndpoint" placeholder="e.g., /name/pikachu or ?limit=5">
+        <button onclick="customTest()">Test Custom Endpoint</button>
+        <div id="customResult"></div>
+    </div>
+
+    <script src="example.js"></script>
+</body>
+
+</html>
